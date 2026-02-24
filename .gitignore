@@ -1,3 +1,11 @@
 .agents/
 .claude/
 skills-lock.json
+.codex/
+.cursor/
+.gemini/
+.tessl/
+evals/
+.mcp.json
+tessl.json
+tile.json

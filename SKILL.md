@@ -1,7 +1,6 @@
 ---
 name: subscription-tracker
-description: >
-  Track, manage, and get reminders for paid subscriptions and SaaS services.
+description:   Track, manage, and get reminders for paid subscriptions and SaaS services.
   Use this skill whenever the user mentions subscriptions, SaaS costs, trial
   periods, recurring payments, billing cycles, or says things like "remind me
   about my subscription", "add a subscription", "how much do I spend on
