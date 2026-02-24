@@ -58,38 +58,10 @@ Do not auto-show a dashboard. Wait for the user's choice.
 
 ## Data Schema
 
-```json
-{
-  "subscriptions": [
-    {
-      "id": "uuid-string",
-      "name": "Notion",
-      "url": "https://notion.so",
-      "reference": "Team workspace, billing: sean@example.com",
-      "amount": 16.00,
-      "currency": "USD",
-      "period": "monthly",
-      "start_date": "2025-01-15",
-      "trial_days": 14,
-      "active": true,
-      "notes": ""
-    }
-  ]
-}
-```
+See [`references/schema.md`](references/schema.md) for the full field reference and JSON structure.
 
-**Fields:**
-- `id` — generate with `python3 -c "import uuid; print(uuid.uuid4())"`
-- `name` — service name
-- `url` — service URL (optional)
-- `reference` — free-form: account email, billing contact, purpose, etc.
-- `amount` — cost per billing period
-- `currency` — `RUB`, `USD`, or `EUR`
-- `period` — `monthly`, `quarterly`, or `yearly`
-- `start_date` — ISO date when subscription (or trial) began
-- `trial_days` — free trial days (0 if none)
-- `active` — `true` / `false`
-- `notes` — optional extra notes
+Required fields: `id`, `name`, `amount`, `currency`, `period`, `start_date`, `active`.
+Optional: `url`, `reference`, `trial_days` (default 0), `notes`.
 
 ---
 
@@ -177,38 +149,17 @@ Only `active: true` subscriptions. Group by currency, no cross-conversion.
 
 ## Date Calculation Logic
 
-Use Python to compute next billing date and trial status:
+Use `scripts/compute_dates.py` to compute next billing dates and trial status:
 
-```python
-from datetime import date, timedelta
+```bash
+# All active subscriptions
+python3 scripts/compute_dates.py /path/to/subscriptions.json --all
 
-period_days = {"monthly": 30, "quarterly": 91, "yearly": 365}
-
-def compute(sub, today=None):
-    today = today or date.today()
-    start = date.fromisoformat(sub["start_date"])
-    trial_days = sub.get("trial_days", 0)
-
-    trial_end = start + timedelta(days=trial_days) if trial_days > 0 else None
-    first_bill = trial_end if trial_end else start
-
-    pd = period_days[sub["period"]]
-    next_bill = first_bill
-    while next_bill <= today:
-        next_bill += timedelta(days=pd)
-
-    days_to_bill = (next_bill - today).days
-    days_to_trial_end = (trial_end - today).days if trial_end and trial_end >= today else None
-
-    return next_bill, days_to_bill, trial_end, days_to_trial_end
+# Only subscriptions needing attention (trial ≤3 days or charge ≤2 days)
+python3 scripts/compute_dates.py /path/to/subscriptions.json --reminders
 ```
 
----
-
-## Language
-
-Respond in the language the user is using (Russian or English).
-Display templates above use Russian by default.
+Outputs JSON array with `next_bill`, `days_to_bill`, `trial_end`, `days_to_trial_end` for each subscription.
 
 ---
 
